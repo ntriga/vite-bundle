@@ -2,12 +2,14 @@
 
 namespace Pentatrion\ViteBundle\Service;
 
+use App\Kernel;
 use Pentatrion\ViteBundle\Event\RenderAssetTagEvent;
 use Pentatrion\ViteBundle\Model\Tag;
 use Pentatrion\ViteBundle\Util\InlineContent;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Service\ResetInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class EntrypointRenderer implements ResetInterface
 {
@@ -17,6 +19,7 @@ class EntrypointRenderer implements ResetInterface
     private string $preload;
     private ?RequestStack $requestStack;
     private ?EventDispatcherInterface $eventDispatcher;
+    private KernelInterface $kernel;
 
     private $returnedViteClients = [];
     private $returnedReactRefresh = [];
@@ -33,7 +36,8 @@ class EntrypointRenderer implements ResetInterface
         bool $useAbsoluteUrl = false,
         string $preload = 'link-tag',
         ?RequestStack $requestStack = null,
-        ?EventDispatcherInterface $eventDispatcher = null
+        ?EventDispatcherInterface $eventDispatcher = null,
+        KernelInterface $kernel
     ) {
         $this->entrypointsLookupCollection = $entrypointsLookupCollection;
         $this->tagRendererCollection = $tagRendererCollection;
@@ -41,6 +45,7 @@ class EntrypointRenderer implements ResetInterface
         $this->preload = $preload;
         $this->requestStack = $requestStack;
         $this->eventDispatcher = $eventDispatcher;
+        $this->kernel = $kernel;
     }
 
     private function getEntrypointsLookup(?string $configName = null): EntrypointsLookup
@@ -277,6 +282,41 @@ class EntrypointRenderer implements ResetInterface
 
         return $this->renderTags($tags, $isBuild, $toString);
     }
+
+
+    /**
+     * @return string|array
+     */
+    public function renderInlineStyles(
+        string $entryName,
+        array $options = [],
+        ?string $configName = null,
+        bool $toString = true
+    ) {
+        $entrypointsLookup = $this->getEntrypointsLookup($configName);
+        //$tagRenderer = $this->getTagRenderer($configName);
+
+        if (!$entrypointsLookup->hasFile()) {
+            return '';
+        }
+
+        $isBuild = $entrypointsLookup->isBuild();
+
+        $final_output = '';
+
+        if ($isBuild) {
+            $final_output .= '<style type="text/css">';
+            foreach ($entrypointsLookup->getCSSFiles($entryName) as $filePath) {
+                $localPath = $this->kernel->getProjectDir() .'/public' . $filePath;
+                $contents = file_get_contents($localPath);
+                $final_output.= $contents;
+            }
+            $final_output .= '</style>';
+        }
+
+        return $final_output;
+    }
+
 
     /**
      * @return string|array

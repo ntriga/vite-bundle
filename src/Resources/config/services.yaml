@@ -16,6 +16,7 @@ services:
             - "%pentatrion_vite.preload%"
             - "@?request_stack"
             - "@?event_dispatcher"
+            - "@kernel"
 
     Pentatrion\ViteBundle\Service\EntrypointRenderer:
         alias: "pentatrion_vite.entrypoint_renderer"
