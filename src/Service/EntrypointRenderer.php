@@ -282,6 +282,36 @@ class EntrypointRenderer implements ResetInterface
 
         return $this->renderTags($tags, $isBuild, $toString);
     }
+    
+
+    /**
+     * @return string|array
+     */
+    public function renderLazyLinks(
+        string $entryName,
+        array $options = [],
+        ?string $configName = null,
+        bool $toString = true
+    ): mixed {
+        $entrypointsLookup = $this->getEntrypointsLookup($configName);
+
+        if (!$entrypointsLookup->hasFile()) {
+            return '';
+        }
+
+        $return_html = '';
+
+        foreach ($entrypointsLookup->getCSSFiles($entryName) as $filePath) {
+            if (false === \in_array($filePath, $this->renderedFiles['styles'], true)) {
+                $return_html .= '<link rel="preload" href="'.$filePath.'" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">
+                <noscript><link rel="stylesheet" href="'.$filePath.'"></noscript>';
+
+                $this->renderedFiles['styles'][] = $filePath;
+            }
+        }
+
+        return $return_html;
+    }
 
 
     /**
