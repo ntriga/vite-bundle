@@ -1,6 +1,6 @@
 {
-    "name": "pentatrion/vite-bundle",
-    "description": "Vite integration for your Symfony app",
+    "name": "ntriga/vite-bundle",
+    "description": "Vite integration for your Symfony app. Forked by Ntriga for inline + lazyloaded CSS support.",
     "keywords": [
         "bundle",
         "symfony",
@@ -11,8 +11,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Hugues Tavernier",
-            "email": "hugues.tavernier@protonmail.com"
+            "name": "Ntriga",
+            "email": "robin@ntriga.be"
         }
     ],
     "require": {
